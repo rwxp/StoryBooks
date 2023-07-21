@@ -16,11 +16,24 @@ require('./config/passport')(passport);
 connectDB();
 const app = express();
 
+//Middleware (Body Parser) to accept form data.
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
+
+//Handlebars helpers
+const { formatDate } = require('./helpers/hbs');
 //Handlebars:
-app.engine('.hbs', exphbs.engine({ defaultLayout: 'main', extname: '.hbs' }));
+app.engine(
+  '.hbs',
+  exphbs.engine({
+    helpers: { formatDate },
+    defaultLayout: 'main',
+    extname: '.hbs',
+  })
+);
 app.set('view engine', '.hbs');
 
 //Sessions
@@ -41,6 +54,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 //Here we import router from routes/index
 app.use('/', require('./routes/index'));
 app.use('/auth', require('./routes/auth'));
+app.use('/stories', require('./routes/stories'));
 const PORT = process.env.PORT || 5000;
 
 app.listen(
